@@ -31,6 +31,9 @@ export default function NieuweFactuur() {
 
     setLoading(true)
 
+    // ✅ Debug: controleer of env-url beschikbaar is
+    console.log('URL uit env:', process.env.NEXT_PUBLIC_FUNCTION_URL)
+
     try {
       const res = await fetch(process.env.NEXT_PUBLIC_FUNCTION_URL!, {
         method: 'POST',
