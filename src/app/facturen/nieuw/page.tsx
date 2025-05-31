@@ -1,8 +1,11 @@
 'use client'
 
 import { useState } from 'react'
+import { useSupabase } from '@/providers'
 
 export default function NieuweFactuur() {
+  const { supabase, session } = useSupabase()
+
   const [klant, setKlant] = useState('')
   const [bedrag, setBedrag] = useState('')
   const [datum, setDatum] = useState('')
@@ -16,36 +19,39 @@ export default function NieuweFactuur() {
     setError('')
     setLoading(true)
 
-    const res = await fetch(
-      'https://dljzsubnvstfsblegdqs.functions.supabase.co/createInvoice',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization:
-            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsanpzdWJudnN0ZnNibGVnZHFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg2ODkwMDUsImV4cCI6MjA2NDI2NTAwNX0.rUpsUc5UmraPjrIghN4I9B-d6LGH9vkHHG9ss_Lu6vw',
-        },
-        body: JSON.stringify({
-          klant,
-          bedrag: parseFloat(bedrag),
-          datum,
-          beschrijving: beschrijving || null,
-        }),
+    try {
+      const res = await fetch(
+        'https://dljzsubnvstfsblegdqs.functions.supabase.co/createInvoice',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            klant,
+            bedrag: parseFloat(bedrag),
+            datum,
+            beschrijving: beschrijving || null,
+          }),
+        }
+      )
+
+      const data = await res.json()
+      if (res.ok) {
+        setMessage('✅ Factuur succesvol opgeslagen')
+        setKlant('')
+        setBedrag('')
+        setDatum('')
+        setBeschrijving('')
+      } else {
+        setError(data.error || '❌ Er ging iets mis')
       }
-    )
-
-    const data = await res.json()
-    setLoading(false)
-
-    if (res.ok) {
-      setMessage('✅ Factuur succesvol opgeslagen')
-      setKlant('')
-      setBedrag('')
-      setDatum('')
-      setBeschrijving('')
-    } else {
-      setError(data.error || '❌ Er ging iets mis')
+    } catch (err) {
+      setError('❌ Netwerkfout of ongeldig antwoord')
     }
+
+    setLoading(false)
   }
 
   return (

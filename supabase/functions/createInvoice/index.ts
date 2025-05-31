@@ -4,6 +4,9 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 
 serve(async (req) => {
   try {
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const token = authHeader.replace('Bearer ', '')
+
     const body = await req.json()
     const { klant, bedrag, datum, beschrijving } = body
 
@@ -14,11 +17,31 @@ serve(async (req) => {
       )
     }
 
-    // @ts-ignore: Deno.env wordt alleen in Deno herkend, niet door VS Code TS
+    if (isNaN(Number(bedrag)) || Number(bedrag) <= 0) {
+      return new Response(
+        JSON.stringify({ error: 'Bedrag is ongeldig' }),
+        { status: 400 }
+      )
+    }
+
+    // @ts-ignore
     const supabase = createClient(
       Deno.env.get('PUBLIC_SUPABASE_URL')!,
-      Deno.env.get('PUBLIC_SUPABASE_ANON_KEY')!
+      Deno.env.get('PUBLIC_SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
     )
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Gebruiker kon niet worden opgehaald' }),
+        { status: 401 }
+      )
+    }
 
     const { error } = await supabase.from('invoices').insert([
       {
@@ -26,6 +49,7 @@ serve(async (req) => {
         bedrag,
         datum,
         beschrijving: beschrijving ?? null,
+        user_id: user.id,
       },
     ])
 
