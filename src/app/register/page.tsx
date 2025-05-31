@@ -1,27 +1,40 @@
 'use client'
 
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/navigation'
+import { useSupabase } from '../../providers'
 import { useState } from 'react'
 
 export default function RegisterPage() {
-  const supabase = useSupabaseClient()
+  const { supabase } = useSupabase()
   const router = useRouter()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
 
   const handleRegister = async () => {
-    const { error } = await supabase.auth.signUp({
+    setMessage('')
+    setError('')
+
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
+    console.log('Session data:', data.session) // ← tijdelijk laten staan voor debug
+
     if (error) {
       setError(error.message)
-    } else {
+      return
+    }
+
+    if (data.session) {
       router.push('/dashboard')
+    } else {
+      setMessage(
+        'Registratie gelukt! Controleer je inbox om je e-mail te bevestigen.'
+      )
     }
   }
 
@@ -43,7 +56,11 @@ export default function RegisterPage() {
         onChange={(e) => setPassword(e.target.value)}
       />
       {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-      <button onClick={handleRegister} className="w-full bg-black text-white p-2">
+      {message && <p className="text-green-600 text-sm mb-2">{message}</p>}
+      <button
+        onClick={handleRegister}
+        className="w-full bg-black text-white p-2"
+      >
         Registreren
       </button>
     </div>
