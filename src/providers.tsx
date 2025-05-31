@@ -2,14 +2,22 @@
 
 import { createBrowserClient } from '@supabase/ssr'
 import { Session, SupabaseClient } from '@supabase/supabase-js'
-import { useEffect, useState, createContext, useContext } from 'react'
+import {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ReactNode,
+} from 'react'
 
 type SupabaseContextType = {
   supabase: SupabaseClient
   session: Session | null
 }
 
-const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined)
+const SupabaseContext = createContext<SupabaseContextType | undefined>(
+  undefined
+)
 
 export function useSupabase() {
   const context = useContext(SupabaseContext)
@@ -21,7 +29,7 @@ export default function Providers({
   children,
   initialSession,
 }: {
-  children: React.ReactNode
+  children: ReactNode
   initialSession: Session | null
 }) {
   const [supabase] = useState(() =>
@@ -30,14 +38,21 @@ export default function Providers({
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
   )
-  const [session, setSession] = useState<Session | null>(initialSession ?? null)
+  const [session, setSession] = useState<Session | null>(
+    initialSession ?? null
+  )
 
   useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+    })
+
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
     })
+
     return () => subscription.unsubscribe()
   }, [supabase])
 

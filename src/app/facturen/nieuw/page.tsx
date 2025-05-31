@@ -29,13 +29,16 @@ export default function NieuweFactuur() {
       return
     }
 
+    const url = process.env.NEXT_PUBLIC_FUNCTION_URL
+    if (!url) {
+      setError('❌ Server configuratie ontbreekt')
+      return
+    }
+
     setLoading(true)
 
-    // ✅ Debug: controleer of env-url beschikbaar is
-    console.log('URL uit env:', process.env.NEXT_PUBLIC_FUNCTION_URL)
-
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_FUNCTION_URL!, {
+      const res = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useSupabase } from '../../providers'
+import { useSupabase } from '@/providers'
 import { useState } from 'react'
 
 export default function RegisterPage() {
@@ -12,17 +12,19 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
   const handleRegister = async () => {
     setMessage('')
     setError('')
+    setLoading(true)
 
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
     })
 
-    console.log('Session data:', data.session) // ← tijdelijk laten staan voor debug
+    setLoading(false)
 
     if (error) {
       setError(error.message)
@@ -33,7 +35,7 @@ export default function RegisterPage() {
       router.push('/dashboard')
     } else {
       setMessage(
-        'Registratie gelukt! Controleer je inbox om je e-mail te bevestigen.'
+        '✅ Registratie gelukt! Bevestig je e-mailadres via de link in je inbox.'
       )
     }
   }
@@ -41,6 +43,7 @@ export default function RegisterPage() {
   return (
     <div className="p-8 max-w-md mx-auto">
       <h1 className="text-2xl font-bold mb-4">Account aanmaken</h1>
+
       <input
         type="email"
         placeholder="E-mail"
@@ -55,13 +58,16 @@ export default function RegisterPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+
       {message && <p className="text-green-600 text-sm mb-2">{message}</p>}
+      {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
+
       <button
         onClick={handleRegister}
-        className="w-full bg-black text-white p-2"
+        className="w-full bg-black text-white p-2 disabled:opacity-50"
+        disabled={loading}
       >
-        Registreren
+        {loading ? 'Bezig...' : 'Registreren'}
       </button>
     </div>
   )

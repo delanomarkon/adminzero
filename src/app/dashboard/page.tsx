@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useSupabase } from '../../providers'
+import { useSupabase } from '@/providers'
 
 export default function DashboardPage() {
   const { session, supabase } = useSupabase()
@@ -28,13 +29,3 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-bold mb-4">Welkom bij AdminZero</h1>
       <p className="text-sm text-gray-500">
         Je bent ingelogd als: {session.user.email}
-      </p>
-      <button
-        onClick={handleLogout}
-        className="mt-4 bg-red-600 text-white px-4 py-2"
-      >
-        Log uit
-      </button>
-    </div>
-  )
-}

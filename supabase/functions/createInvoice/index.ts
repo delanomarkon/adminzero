@@ -18,16 +18,17 @@ serve(async (req) => {
     }
 
     if (isNaN(Number(bedrag)) || Number(bedrag) <= 0) {
-      return new Response(JSON.stringify({ error: 'Bedrag is ongeldig' }), {
-        status: 400,
-      })
+      return new Response(
+        JSON.stringify({ error: 'Bedrag is ongeldig' }),
+        { status: 400 },
+      )
     }
 
-    // @ts-ignore
+    // @ts-ignore – Deno env-types zijn niet beschikbaar in VS Code
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } },
+      { global: { headers: { Authorization: `Bearer ${token}` } } }
     )
 
     const {
