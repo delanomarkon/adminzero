@@ -13,22 +13,21 @@ serve(async (req) => {
     if (!klant || !bedrag || !datum) {
       return new Response(
         JSON.stringify({ error: 'Verplichte velden ontbreken' }),
-        { status: 400 }
+        { status: 400 },
       )
     }
 
     if (isNaN(Number(bedrag)) || Number(bedrag) <= 0) {
-      return new Response(
-        JSON.stringify({ error: 'Bedrag is ongeldig' }),
-        { status: 400 }
-      )
+      return new Response(JSON.stringify({ error: 'Bedrag is ongeldig' }), {
+        status: 400,
+      })
     }
 
     // @ts-ignore
     const supabase = createClient(
-      Deno.env.get('PUBLIC_SUPABASE_URL')!,
-      Deno.env.get('PUBLIC_SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: `Bearer ${token}` } } }
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: `Bearer ${token}` } } },
     )
 
     const {
@@ -39,7 +38,7 @@ serve(async (req) => {
     if (userError || !user) {
       return new Response(
         JSON.stringify({ error: 'Gebruiker kon niet worden opgehaald' }),
-        { status: 401 }
+        { status: 401 },
       )
     }
 
@@ -62,10 +61,10 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
     })
-  } catch (err) {
+  } catch (_err) {
     return new Response(
       JSON.stringify({ error: 'Ongeldige of ontbrekende JSON' }),
-      { status: 400 }
+      { status: 400 },
     )
   }
 })

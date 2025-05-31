@@ -17,27 +17,42 @@ export default function NieuweFactuur() {
   const handleSubmit = async () => {
     setMessage('')
     setError('')
+
+    const bedragNum = Number(bedrag)
+    if (!bedrag || isNaN(bedragNum) || bedragNum <= 0) {
+      setError('❌ Bedrag is ongeldig')
+      return
+    }
+
+    if (!session?.access_token) {
+      setError('❌ Je bent niet ingelogd')
+      return
+    }
+
     setLoading(true)
 
     try {
-      const res = await fetch(
-        'https://dljzsubnvstfsblegdqs.functions.supabase.co/createInvoice',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            klant,
-            bedrag: parseFloat(bedrag),
-            datum,
-            beschrijving: beschrijving || null,
-          }),
-        }
-      )
+      const res = await fetch(process.env.NEXT_PUBLIC_FUNCTION_URL!, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          klant,
+          bedrag: bedragNum,
+          datum,
+          beschrijving: beschrijving || null,
+        }),
+      })
 
-      const data = await res.json()
+      let data
+      try {
+        data = await res.json()
+      } catch {
+        data = null
+      }
+
       if (res.ok) {
         setMessage('✅ Factuur succesvol opgeslagen')
         setKlant('')
@@ -45,10 +60,10 @@ export default function NieuweFactuur() {
         setDatum('')
         setBeschrijving('')
       } else {
-        setError(data.error || '❌ Er ging iets mis')
+        setError(data?.error || '❌ Ongeldig antwoord van server')
       }
     } catch (err) {
-      setError('❌ Netwerkfout of ongeldig antwoord')
+      setError('❌ Netwerkfout of onbekende fout')
     }
 
     setLoading(false)
