@@ -1,12 +1,11 @@
 'use client'
 
-import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { useSupabase } from '../../providers'
 
 export default function DashboardPage() {
-  const session = useSession()
-  const supabase = useSupabaseClient()
+  const { session, supabase } = useSupabase()
   const router = useRouter()
 
   useEffect(() => {

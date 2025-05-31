@@ -1,11 +1,11 @@
 'use client'
 
-import { useSupabaseClient } from '@supabase/auth-helpers-react'
 import { useRouter } from 'next/navigation'
+import { useSupabase } from '../../providers'
 import { useState } from 'react'
 
 export default function LoginPage() {
-  const supabase = useSupabaseClient()
+  const { supabase } = useSupabase()
   const router = useRouter()
 
   const [email, setEmail] = useState('')

@@ -14,6 +14,7 @@ serve(async (req) => {
       )
     }
 
+    // @ts-ignore: Deno.env wordt alleen in Deno herkend, niet door VS Code TS
     const supabase = createClient(
       Deno.env.get('PUBLIC_SUPABASE_URL')!,
       Deno.env.get('PUBLIC_SUPABASE_ANON_KEY')!
